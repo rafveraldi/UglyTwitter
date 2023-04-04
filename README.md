@@ -1,2 +1,3 @@
-# fastAPI-uglyTwitter
- Twitter Clone using Python stack
+# fastAPI-uglyBird
+
+Twitter Clone using Python stack

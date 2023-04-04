@@ -1,10 +1,9 @@
 from fastapi import FastAPI
 
-from sql_app import main
 from frontend import frontend
+from sql_app import main
 
-
-app = FastAPI(title='UglyTwitter')
+app = FastAPI(title='uglyTwitter')
 
 
 app.include_router(frontend.router)
