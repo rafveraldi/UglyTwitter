@@ -57,11 +57,17 @@ class UserCreate(UserBase):
     password: str
 
 
-class User(UserBase):
+class UserBasic(UserBase):
     id: int
     email: Optional[EmailStr] = None
     bio: Optional[str] = None
     name: Optional[str] = None
+
+    class Config:
+        orm_mode = True
+
+
+class User(UserBasic):
     likes: list[Like] = []
     tweets: list[Tweet] = []
     comments: list[Comment] = []

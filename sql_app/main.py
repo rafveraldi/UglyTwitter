@@ -34,12 +34,12 @@ async def login_for_access_token(db: Session = Depends(get_db), form_data: OAuth
     return {'access_token': access_token, 'token_type': 'bearer'}
 
 
-@ router.post('/users/', response_model=schemas.User)
+@router.post('/users/', response_model=schemas.User)
 def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     db_user = auth.get_user(db, username=user.username)
     if db_user:
         raise HTTPException(
-            status_code=400, detail="Username already registered")
+            status_code=400, detail="Username already registered.")
     return crud.create_user(db=db, user=user)
 
 
@@ -49,15 +49,27 @@ def read_users_me(db: Session = Depends(get_db), username: str = Depends(auth.ge
     return current_user
 
 
-@ router.put('/users/me')
-def update_user():
-    return 'User has been updated.'
+@router.put('/users/me', response_model=schemas.UserBasic)
+def update_user_me(db: Session = Depends(get_db), current_user: schemas.UserBasic = Depends(read_users_me), new_details: schemas.UserBasic = Depends()):
+    if new_details.id != current_user.id:
+        raise HTTPException(
+            status_code=400, detail="Id does not match authenticated user.")
+    updated_user = crud.update_user(db, new_details)
+    return updated_user
 
 
-@ router.delete('/users/me')
-def delete_user():
-    return "User has been deleted."
-
+@router.delete('/users/me')
+def delete_user_me(user_credentials: schemas.UserCreate, current_user: schemas.UserBasic = Depends(read_users_me), db: Session = Depends(get_db)):
+    if not auth.get_user(db, user_credentials.username):
+        raise HTTPException(
+            status_code=400, detail="1 Username or password does not match authenticated user.")
+    if current_user.id != auth.get_user(db, user_credentials.username).id:
+        raise HTTPException(
+            status_code=400, detail="2 Username or password does not match authenticated user.")
+    if not auth.verify_password(user_credentials.password, current_user.password):
+        raise HTTPException(
+            status_code=400, detail="3 Username or password does not match authenticated user.")
+    return crud.delete_user(db, current_user.id)
 
 # @router.get('/tweets')
 # def read_tweets():
