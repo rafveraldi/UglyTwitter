@@ -1,5 +1,7 @@
 import bcrypt
+from datetime import datetime
 from sqlalchemy.orm import Session
+from fastapi import status
 from fastapi.encoders import jsonable_encoder
 
 
@@ -44,3 +46,32 @@ def delete_user(db: Session, user_id: int):
     db.query(models.User).filter(models.User.id == user_id).delete()
     db.commit()
     return 'User has been deleted.'
+
+
+def get_followers(user_id: int, db: Session):
+    return db.query(models.Follow).filter(models.Follow.followee_id == user_id).all()
+
+
+def get_following(user_id: int, db: Session):
+    return db.query(models.Follow).filter(models.Follow.follower_id == user_id).all()
+
+
+def check_following(follower_user_id: int, followee_user_id: int, db: Session):
+    return db.query(models.Follow).filter(models.Follow.follower_id == follower_user_id, models.Follow.followee_id == followee_user_id).all().__len__()
+
+
+def create_follow(follower_user_id: int, followee_user_id: int, db: Session):
+    creation_datetime = datetime.utcnow()
+    db_follow = models.Follow(follower_id=follower_user_id,
+                              followee_id=followee_user_id, created_at=creation_datetime)
+    db.add(db_follow)
+    db.commit()
+    db.refresh(db_follow)
+    return db_follow
+
+
+def delete_follow(follower_user_id: int, followee_user_id: int, db: Session):
+    db.query(models.Follow).filter(models.Follow.follower_id ==
+                                   follower_user_id, models.Follow.followee_id == followee_user_id).delete()
+    db.commit()
+    return 'Follow has been deleted.'

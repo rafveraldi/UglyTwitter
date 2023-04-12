@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from typing import Annotated
+from typing import Annotated, List
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
@@ -70,6 +70,47 @@ def delete_user_me(user_credentials: schemas.UserCreate, current_user: schemas.U
         raise HTTPException(
             status_code=400, detail="3 Username or password does not match authenticated user.")
     return crud.delete_user(db, current_user.id)
+
+
+@router.get('/followers/{user_id}', response_model=List[schemas.Follow])
+def read_followers(user_id: int, db: Session = Depends(get_db)):
+    return crud.get_followers(user_id, db)
+
+
+@router.get('/following/{user_id}', response_model=List[schemas.Follow])
+def read_following(user_id: int, db: Session = Depends(get_db)):
+    return crud.get_following(user_id, db)
+
+
+@router.post('/follow/{followee_user_id}', response_model=schemas.Follow)
+def create_follow(followee_user_id: int, current_user: schemas.User = Depends(read_users_me), db: Session = Depends(get_db)):
+    if followee_user_id == current_user.id:
+        raise HTTPException(
+            status_code=400, detail="You can't follow yourself.")
+    db_followee_id = crud.get_user_by_id(db, followee_user_id)
+    if not db_followee_id:
+        raise HTTPException(
+            status_code=400, detail="Followee id does not exist.")
+    following_check = crud.check_following(
+        current_user.id, followee_user_id, db)
+    if following_check != 0:
+        raise HTTPException(
+            status_code=400, detail="Already following this person.")
+    return crud.create_follow(current_user.id, followee_user_id, db)
+
+
+@router.delete('/follow/{followee_user_id}')
+def delete_follow(followee_user_id: int, current_user: schemas.User = Depends(read_users_me), db: Session = Depends(get_db)):
+    db_followee_id = crud.get_user_by_id(db, followee_user_id)
+    if not db_followee_id:
+        raise HTTPException(
+            status_code=400, detail="Followee id does not exist.")
+    following_check = crud.check_following(
+        current_user.id, followee_user_id, db)
+    if following_check == 0:
+        raise HTTPException(
+            status_code=400, detail="You're not following this person.")
+    return crud.delete_follow(current_user.id, followee_user_id, db)
 
 # @router.get('/tweets')
 # def read_tweets():

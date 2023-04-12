@@ -1,4 +1,4 @@
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Text, Time
+from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Text, DateTime
 from sqlalchemy.orm import relationship
 
 from .database import Base
@@ -30,8 +30,8 @@ class Tweet(Base):
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey('users.id'))
     content = Column(Text, nullable=False)
-    created_at = Column(Time)
-    updated_at = Column(Time)
+    created_at = Column(DateTime)
+    updated_at = Column(DateTime)
 
     owner = relationship('User', back_populates='tweets')
     comments = relationship('Comment', back_populates='tweet')
@@ -44,7 +44,7 @@ class Like(Base):
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey('users.id'))
     tweet_id = Column(Integer, ForeignKey('tweets.id'))
-    created_at = Column(Time)
+    created_at = Column(DateTime)
 
     owner = relationship('User', back_populates='likes')
 
@@ -55,7 +55,7 @@ class Follow(Base):
     id = Column(Integer, primary_key=True, index=True)
     follower_id = Column(Integer, ForeignKey('users.id'))
     followee_id = Column(Integer, ForeignKey('users.id'))
-    created_at = Column(Time)
+    created_at = Column(DateTime)
 
     user_follower = relationship(
         'User', back_populates='following', primaryjoin='User.id==Follow.follower_id')
@@ -70,8 +70,8 @@ class Comment(Base):
     user_id = Column(Integer, ForeignKey('users.id'))
     tweet_id = Column(Integer, ForeignKey('tweets.id'))
     content = Column(Text, nullable=False)
-    created_at = Column(Time)
-    updated_at = Column(Time)
+    created_at = Column(DateTime)
+    updated_at = Column(DateTime)
 
     owner = relationship("User", back_populates='comments')
     tweet = relationship('Tweet', back_populates='comments')
