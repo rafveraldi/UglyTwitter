@@ -75,3 +75,48 @@ def delete_follow(follower_user_id: int, followee_user_id: int, db: Session):
                                    follower_user_id, models.Follow.followee_id == followee_user_id).delete()
     db.commit()
     return 'Follow has been deleted.'
+
+
+def get_tweets_explore(user_id: int, db: Session):
+    return db.query(models.Tweet).filter(models.Tweet.user_id != user_id).all()
+
+
+def get_tweets_user(user_id: int, db: Session):
+    return db.query(models.Tweet).filter(models.Tweet.user_id == user_id).all()
+
+
+def get_tweets_following(user_id: int, db: Session):
+    return db.query(models.Tweet).join(models.Follow, models.Tweet.user_id == models.Follow.followee_id).filter(models.Follow.follower_id == user_id).all()
+
+
+def get_tweet_by_id(tweet_id: int, db: Session):
+    return db.query(models.Tweet).filter(models.Tweet.id == tweet_id).first()
+
+
+def create_tweet(current_user_id: int, tweet: schemas.TweetBase, db: Session):
+    creation_datetime = datetime.utcnow()
+    db_tweet = models.Tweet(
+        content=tweet.content, user_id=current_user_id, created_at=creation_datetime)
+    db.add(db_tweet)
+    db.commit()
+    db.refresh(db_tweet)
+    return db_tweet
+
+
+def update_tweet(tweet_id: int, new_content: schemas.TweetBase, db: Session):
+    db_tweet = get_tweet_by_id(tweet_id, db).__dict__
+    db_tweet_model = schemas.TweetBasic(**db_tweet)
+    update_data = new_content.dict()
+    update_data['updated_at'] = datetime.utcnow()
+    updated_tweet = db_tweet_model.copy(update=update_data)
+    db.query(models.Tweet).filter(
+        models.Tweet.id == tweet_id).update(updated_tweet.dict())
+    db.commit()
+    updated_tweet = jsonable_encoder(updated_tweet)
+    return updated_tweet
+
+
+def delete_tweet(tweet_id: int, db: Session):
+    db.query(models.Tweet).filter(models.Tweet.id == tweet_id).delete()
+    db.commit()
+    return 'Tweet has been deleted.'

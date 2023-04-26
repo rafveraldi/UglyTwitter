@@ -72,17 +72,17 @@ def delete_user_me(user_credentials: schemas.UserCreate, current_user: schemas.U
     return crud.delete_user(db, current_user.id)
 
 
-@router.get('/followers/{user_id}', response_model=List[schemas.Follow])
+@router.get('/followers/{user_id:int}', response_model=List[schemas.Follow])
 def read_followers(user_id: int, db: Session = Depends(get_db)):
     return crud.get_followers(user_id, db)
 
 
-@router.get('/following/{user_id}', response_model=List[schemas.Follow])
+@router.get('/following/{user_id:int}', response_model=List[schemas.Follow])
 def read_following(user_id: int, db: Session = Depends(get_db)):
     return crud.get_following(user_id, db)
 
 
-@router.post('/follow/{followee_user_id}', response_model=schemas.Follow)
+@router.post('/follow/{followee_user_id:int}', response_model=schemas.Follow)
 def create_follow(followee_user_id: int, current_user: schemas.User = Depends(read_users_me), db: Session = Depends(get_db)):
     if followee_user_id == current_user.id:
         raise HTTPException(
@@ -99,7 +99,7 @@ def create_follow(followee_user_id: int, current_user: schemas.User = Depends(re
     return crud.create_follow(current_user.id, followee_user_id, db)
 
 
-@router.delete('/follow/{followee_user_id}')
+@router.delete('/follow/{followee_user_id:int}')
 def delete_follow(followee_user_id: int, current_user: schemas.User = Depends(read_users_me), db: Session = Depends(get_db)):
     db_followee_id = crud.get_user_by_id(db, followee_user_id)
     if not db_followee_id:
@@ -112,21 +112,44 @@ def delete_follow(followee_user_id: int, current_user: schemas.User = Depends(re
             status_code=400, detail="You're not following this person.")
     return crud.delete_follow(current_user.id, followee_user_id, db)
 
-# @router.get('/tweets')
-# def read_tweets():
-#     return 'This are all tweets.'
+
+@router.get('/tweets', response_model=List[schemas.Tweet])
+def read_tweets_explore(current_user: schemas.User = Depends(read_users_me), db: Session = Depends(get_db)):
+    return crud.get_tweets_explore(current_user.id, db)
 
 
-# @router.post('/tweets')
-# def create_tweet():
-#     return 'Tweet has been created.'
+@router.get('/tweets/{user_id:int}', response_model=List[schemas.Tweet])
+def read_tweets_user(user_id: int, current_user: schemas.User = Depends(read_users_me), db: Session = Depends(get_db)):
+    return crud.get_tweets_user(user_id, db)
 
 
-# @router.put('/tweets/{id}')
-# def update_tweet():
-#     return 'Tweet {id} has been updated.'
+@router.get('/tweets/following', response_model=List[schemas.Tweet])
+def read_tweets_following(current_user: schemas.User = Depends(read_users_me), db: Session = Depends(get_db)):
+    return crud.get_tweets_following(current_user.id, db)
 
 
-# @router.delete('/tweets/{id}')
-# def delete_tweet():
-#     return 'Tweet {id} has been deleted.'
+@router.post('/tweets', response_model=schemas.Tweet)
+def create_tweet(tweet: schemas.TweetBase, current_user: schemas.User = Depends(read_users_me), db: Session = Depends(get_db)):
+    return crud.create_tweet(current_user.id, tweet, db)
+
+
+@router.put('/tweets/{tweet_id:int}', response_model=schemas.Tweet)
+def update_tweet(tweet_id, new_content: schemas.TweetBase, current_user: schemas.User = Depends(read_users_me), db: Session = Depends(get_db)):
+    current_tweet = crud.get_tweet_by_id(tweet_id, db)
+    if current_tweet.user_id != current_user.id:
+        raise HTTPException(
+            status_code=400, detail="Tweet not owned by autheticated user.")
+    updated_tweet = crud.update_tweet(tweet_id, new_content, db)
+    return updated_tweet
+
+
+@router.delete('/tweets/{tweet_id:int}')
+def delete_tweet(tweet_id, current_user: schemas.User = Depends(read_users_me), db: Session = Depends(get_db)):
+    current_tweet = crud.get_tweet_by_id(tweet_id, db)
+    if not current_tweet:
+        raise HTTPException(
+            status_code=400, detail="Tweet id does not exist.")
+    if current_tweet.user_id != current_user.id:
+        raise HTTPException(
+            status_code=400, detail="Tweet not owned by autheticated user.")
+    return crud.delete_tweet(tweet_id, db)

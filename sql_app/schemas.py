@@ -36,12 +36,18 @@ class Comment(BaseModel):
         orm_mode = True
 
 
-class Tweet(BaseModel):
+class TweetBase(BaseModel):
+    content: str
+
+
+class TweetBasic(TweetBase):
     id: int
     user_id: int
-    content: str
     created_at: datetime.datetime
     updated_at: Optional[datetime.datetime] = None
+
+
+class Tweet(TweetBasic):
     comments: list[Comment] = []
     likes: list[Like] = []
 
