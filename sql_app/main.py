@@ -34,7 +34,7 @@ async def login_for_access_token(db: Session = Depends(get_db), form_data: OAuth
     return {'access_token': access_token, 'token_type': 'bearer'}
 
 
-@router.post('/users/', response_model=schemas.User)
+@router.post('/users', response_model=schemas.User)
 def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     db_user = auth.get_user(db, username=user.username)
     if db_user:
@@ -72,16 +72,6 @@ def delete_user_me(user_credentials: schemas.UserCreate, current_user: schemas.U
     return crud.delete_user(db, current_user.id)
 
 
-@router.get('/followers/{user_id:int}', response_model=List[schemas.Follow])
-def read_followers(user_id: int, db: Session = Depends(get_db)):
-    return crud.get_followers(user_id, db)
-
-
-@router.get('/following/{user_id:int}', response_model=List[schemas.Follow])
-def read_following(user_id: int, db: Session = Depends(get_db)):
-    return crud.get_following(user_id, db)
-
-
 @router.post('/follow/{followee_user_id:int}', response_model=schemas.Follow)
 def create_follow(followee_user_id: int, current_user: schemas.User = Depends(read_users_me), db: Session = Depends(get_db)):
     if followee_user_id == current_user.id:
@@ -97,6 +87,16 @@ def create_follow(followee_user_id: int, current_user: schemas.User = Depends(re
         raise HTTPException(
             status_code=400, detail="Already following this person.")
     return crud.create_follow(current_user.id, followee_user_id, db)
+
+
+@router.get('/follow/{user_id:int}/followers', response_model=List[schemas.Follow])
+def read_followers(user_id: int, db: Session = Depends(get_db)):
+    return crud.get_followers(user_id, db)
+
+
+@router.get('/follow/{user_id:int}/following', response_model=List[schemas.Follow])
+def read_following(user_id: int, db: Session = Depends(get_db)):
+    return crud.get_following(user_id, db)
 
 
 @router.delete('/follow/{followee_user_id:int}')
@@ -136,11 +136,13 @@ def create_tweet(tweet: schemas.TweetBase, current_user: schemas.User = Depends(
 @router.put('/tweets/{tweet_id:int}', response_model=schemas.Tweet)
 def update_tweet(tweet_id, new_content: schemas.TweetBase, current_user: schemas.User = Depends(read_users_me), db: Session = Depends(get_db)):
     current_tweet = crud.get_tweet_by_id(tweet_id, db)
+    if not current_tweet:
+        raise HTTPException(
+            status_code=400, detail="Tweet id does not exist.")
     if current_tweet.user_id != current_user.id:
         raise HTTPException(
             status_code=400, detail="Tweet not owned by autheticated user.")
-    updated_tweet = crud.update_tweet(tweet_id, new_content, db)
-    return updated_tweet
+    return crud.update_tweet(tweet_id, new_content, db)
 
 
 @router.delete('/tweets/{tweet_id:int}')
@@ -153,3 +155,43 @@ def delete_tweet(tweet_id, current_user: schemas.User = Depends(read_users_me), 
         raise HTTPException(
             status_code=400, detail="Tweet not owned by autheticated user.")
     return crud.delete_tweet(tweet_id, db)
+
+
+@router.get('/tweets/{tweet_id:int}/comments', response_model=List[schemas.Comment])
+def read_comments_tweet(tweet_id, current_user: schemas.User = Depends(read_users_me), db: Session = Depends(get_db)):
+    return crud.get_comments_tweet(tweet_id, db)
+
+
+@router.post('/tweets/{tweet_id:int}/comments', response_model=schemas.Comment)
+def create_comment(comment: schemas.CommentBase, tweet_id, current_user: schemas.User = Depends(read_users_me), db: Session = Depends(get_db)):
+    return crud.create_comment(comment, tweet_id, current_user.id, db)
+
+
+@router.put('/tweets/{tweet_id:int}/comments/{comment_id:int}', response_model=schemas.Comment)
+def update_comment(comment_id, tweet_id, new_content: schemas.CommentBase, current_user: schemas.User = Depends(read_users_me), db: Session = Depends(get_db)):
+    current_comment = crud.get_comment_by_id(comment_id, db)
+    if not current_comment:
+        raise HTTPException(
+            status_code=400, detail="Comment id does not exist.")
+    if current_comment.user_id != current_user.id:
+        raise HTTPException(
+            status_code=400, detail="Comment not owned by autheticated user.")
+    if current_comment.tweet_id != tweet_id:
+        raise HTTPException(
+            status_code=400, detail="Comment not related to tweet.")
+    return crud.update_comment(comment_id, new_content, db)
+
+
+@router.delete('/tweets/{tweet_id:int}/comments/{comment_id:int}')
+def delete_comment(comment_id, tweet_id, current_user: schemas.User = Depends(read_users_me), db: Session = Depends(get_db)):
+    current_comment = crud.get_comment_by_id(comment_id, db)
+    if not current_comment:
+        raise HTTPException(
+            status_code=400, detail="Comment id does not exist.")
+    if current_comment.user_id != current_user.id:
+        raise HTTPException(
+            status_code=400, detail="Comment not owned by autheticated user.")
+    if current_comment.tweet_id != tweet_id:
+        raise HTTPException(
+            status_code=400, detail="Comment not related to tweet.")
+    return crud.delete_comment(comment_id, db)

@@ -24,11 +24,14 @@ class Follow(BaseModel):
         orm_mode = True
 
 
-class Comment(BaseModel):
-    id: int
-    user_id: int
-    tweet_id: int
+class CommentBase(BaseModel):
     content: str
+
+
+class Comment(CommentBase):
+    id: int
+    tweet_id: int
+    user_id: int
     created_at: datetime.datetime
     updated_at: Optional[datetime.datetime] = None
 
@@ -76,7 +79,7 @@ class UserBasic(UserBase):
 class User(UserBasic):
     likes: list[Like] = []
     tweets: list[Tweet] = []
-    comments: list[Comment] = []
+    comments: list[CommentBase] = []
     following: list[Follow] = []
     followers: list[Follow] = []
 

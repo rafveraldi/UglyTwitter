@@ -120,3 +120,40 @@ def delete_tweet(tweet_id: int, db: Session):
     db.query(models.Tweet).filter(models.Tweet.id == tweet_id).delete()
     db.commit()
     return 'Tweet has been deleted.'
+
+
+def get_comments_tweet(tweet_id: int, db: Session):
+    return db.query(models.Comment).filter(models.Comment.tweet_id == tweet_id).all()
+
+
+def get_comment_by_id(comment_id: int, db: Session):
+    return db.query(models.Comment).filter(models.Comment.id == comment_id).first()
+
+
+def create_comment(comment: schemas.CommentBase, current_tweet_id: int, current_user_id: int, db: Session):
+    creation_datetime = datetime.utcnow()
+    db_comment = models.Comment(user_id=current_user_id, tweet_id=current_tweet_id,
+                                content=comment.content, created_at=creation_datetime)
+    db.add(db_comment)
+    db.commit()
+    db.refresh(db_comment)
+    return db_comment
+
+
+def update_comment(comment_id: int, new_content: schemas.CommentBase, db: Session):
+    db_comment = get_comment_by_id(comment_id, db).__dict__
+    db_comment_model = schemas.Comment(**db_comment)
+    update_data = new_content.dict()
+    update_data['updated_at'] = datetime.utcnow()
+    updated_comment = db_comment_model.copy(update=update_data)
+    db.query(models.Comment).filter(models.Comment.id ==
+                                    comment_id).update(updated_comment.dict())
+    db.commit()
+    updated_comment = jsonable_encoder(updated_comment)
+    return updated_comment
+
+
+def delete_comment(comment_id: int, db: Session):
+    db.query(models.Comment).filter(models.Comment.id == comment_id).delete()
+    db.commit()
+    return 'Comment has been deleted.'
