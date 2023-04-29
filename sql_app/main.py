@@ -195,3 +195,35 @@ def delete_comment(comment_id, tweet_id, current_user: schemas.User = Depends(re
         raise HTTPException(
             status_code=400, detail="Comment not related to tweet.")
     return crud.delete_comment(comment_id, db)
+
+
+@router.post('/tweets/{tweet_id:int}/likes/', response_model=schemas.Like)
+def create_like(tweet_id, current_user: schemas.User = Depends(read_users_me), db: Session = Depends(get_db)):
+    current_tweet = crud.get_tweet_by_id(tweet_id, db)
+    if not current_tweet:
+        raise HTTPException(
+            status_code=400, detail="Tweet does not exist.")
+    if current_tweet.user_id == current_user.id:
+        raise HTTPException(
+            status_code=400, detail="You can't like your own tweet.")
+    like_check = crud.check_like(tweet_id, current_user.id, db)
+    if like_check != 0:
+        raise HTTPException(
+            status_code=400, detail="Already liked this tweet.")
+    return crud.create_like(tweet_id, current_user.id, db)
+
+
+@router.delete('/tweets/{tweet_id:int}/likes/')
+def delete_like(tweet_id, current_user: schemas.User = Depends(read_users_me), db: Session = Depends(get_db)):
+    current_tweet = crud.get_tweet_by_id(tweet_id, db)
+    if not current_tweet:
+        raise HTTPException(
+            status_code=400, detail="Tweet does not exist.")
+    if current_tweet.user_id == current_user.id:
+        raise HTTPException(
+            status_code=400, detail="You can't like or delete the like of your own tweet.")
+    like_check = crud.check_like(tweet_id, current_user.id, db)
+    if like_check == 0:
+        raise HTTPException(
+            status_code=400, detail="You did not like this tweet.")
+    return crud.delete_like(tweet_id, current_user.id, db)

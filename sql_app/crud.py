@@ -157,3 +157,24 @@ def delete_comment(comment_id: int, db: Session):
     db.query(models.Comment).filter(models.Comment.id == comment_id).delete()
     db.commit()
     return 'Comment has been deleted.'
+
+
+def check_like(current_tweet_id: int, current_user_id: int, db: Session):
+    return db.query(models.Like).filter(models.Like.tweet_id == current_tweet_id, models.Like.user_id == current_user_id).all().__len__()
+
+
+def create_like(current_tweet_id: int, current_user_id: int, db: Session):
+    creation_datetime = datetime.utcnow()
+    db_like = models.Like(user_id=current_user_id,
+                          tweet_id=current_tweet_id, created_at=creation_datetime)
+    db.add(db_like)
+    db.commit()
+    db.refresh(db_like)
+    return db_like
+
+
+def delete_like(current_tweet_id: int, current_user_id: int, db: Session):
+    db.query(models.Like).filter(models.Like.tweet_id ==
+                                 current_tweet_id, models.Like.user_id == current_user_id).delete()
+    db.commit()
+    return 'Like has been deleted'
