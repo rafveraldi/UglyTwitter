@@ -1,0 +1,36 @@
+<div id="tweet-div-{{ tweet.id }}" class="card mb-3">
+    <div class="card-body">
+        <div class="d-flex align-items-center">
+            <div id="tweet-div-{{ tweet.id }}-edit" class="flex-grow-1">
+                <h5 class="card-title mb-1">{{ tweet.content }}
+                </h5>
+                <p class="card-text mb-0 text-muted"><small>Posted by <a href="{{ tweet.owner.username }}">{{
+                            tweet.owner.username }}</a>
+                        {% if tweet.owner.id == user.id %}
+                        <i hx-get="/webutils/tweet/{{ tweet.id }}/edit" hx-trigger="click"
+                            hx-target="#tweet-div-{{ tweet.id }}-edit" hx-swap="outerHTML"
+                            class="far fa-edit edit-icon"></i>
+                        {% endif %}
+                    </small>
+                </p>
+            </div>
+            {% include "partials/like.html" %}
+        </div>
+    </div>
+    <div class="card-footer">
+        {% for comment in tweet.comments %}
+        {% include "partials/comment.html" %}
+        {% endfor %}
+        <div class="row">
+            <div class="col">
+                <form>
+                    <div class="form-group">
+                        <textarea class="form-control" name="comment" placeholder="Add a comment..."></textarea>
+                    </div>
+                    <button hx-post="/webutils/tweet/{{ tweet.id }}/comment" hx-target="#tweet-div-{{ tweet.id }}"
+                        hx-swap="outerHTML" class="btn btn-sm btn-primary">Comment</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

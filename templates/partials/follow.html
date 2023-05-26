@@ -1,0 +1,19 @@
+<div id="div-follow" class="row">
+    <div class="col-md-8">
+        <div class="d-flex justify-content-start">
+            <div class="card p-3">
+                <div class="d-flex align-items-center">
+                    <h1 class="mr-3">{{ user_profile.username }}</h1>
+                    {% if user_profile.username == user.username %}
+                    {% elif user_profile.id in user.following|map(attribute='followee_id')|list %}
+                    <button hx-delete="/webutils/follow/{{ user_profile.username }}" hx-target="#div-follow"
+                        hx-swap="outerHTML" class="btn btn-secondary">Unfollow</button>
+                    {% else %}
+                    <button hx-post="/webutils/follow/{{ user_profile.username }}" hx-target="#div-follow"
+                        hx-swap="outerHTML" class="btn btn-primary">Follow</button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

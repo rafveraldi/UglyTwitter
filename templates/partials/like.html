@@ -1,0 +1,12 @@
+<div class="ml-3">
+        {% if user.id in tweet.likes|map(attribute='user_id')|list %}
+        <a class="card-link text-danger"><i class="fas fa-heart" hx-delete="/webutils/tweet/{{ tweet.id }}/like"
+                        hx-trigger="click" hx-target="#tweet-div-{{ tweet.id }}" hx-swap="outerHTML"></i></a>
+        {% else %}
+        <a class="card-link text-danger"><i class="far fa-heart" hx-post="/webutils/tweet/{{ tweet.id }}/like"
+                        hx-trigger="click" hx-target="#tweet-div-{{ tweet.id }}" hx-swap="outerHTML"></i></a>
+        {% endif %}
+        {% if tweet.likes|count > 0 %}
+        <span class="text-muted">{{ tweet.likes|count }}</span>
+        {% endif %}
+</div>

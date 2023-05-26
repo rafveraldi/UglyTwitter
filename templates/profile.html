@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Ugly | {{ user_profile.username }}'s Tweets</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
+    <script src="https://unpkg.com/htmx.org@1.9.2"
+        integrity="sha384-L6OqL9pRWyyFU3+/bjdSri+iIphTN/bvYyM37tICVyOJkWZLpP2vGn6VUEXgzg6h"
+        crossorigin="anonymous"></script>
+    <link href="https://fonts.googleapis.com/css?family=Gochi+Hand&display=swap" rel="stylesheet">
+    <style>
+        h1 {
+            font-family: 'Gochi Hand', cursive;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header d-flex justify-content-between align-items-center mb-4">
+            <h1><a href="/home" class="text-dark">Ugly</a></h1>
+            <div class="dropdown">
+                <a class="btn btn-secondary dropdown-toggle" href="#" role="button" id="dropdownMenuLink"
+                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    &#9776;
+                </a>
+                <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+                    <a class="dropdown-item" href="/{{ user.username }}">Your Tweets</a>
+                    <a class="dropdown-item" href="/explore">Explore</a>
+                    <div class="dropdown-divider"></div>
+                    <a class="dropdown-item" href="/logout">Logout</a>
+                </div>
+            </div>
+        </div>
+        {% include "partials/follow.html" %}
+        <br />
+        {% if tweets|count == 0 %}
+        <div class="alert alert-info" role="alert">
+            {{ user_profile.username }} has not tweeted anything yet. <a href="/explore" class="alert-link">Click
+                here</a> to explore.
+        </div>
+        {% else %}
+        {% for tweet in tweets %}
+        {% include "partials/tweet.html" %}
+        {% endfor %}
+        {% endif %}
+    </div>
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+</body>
+
+</html>

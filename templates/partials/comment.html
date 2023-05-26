@@ -1,0 +1,17 @@
+<div id="comment-div-{{ comment.id }}" class="row">
+    <div id="comment-div-{{ comment.id }}-edit" class="col-12 col-md-10">
+        <div class="comment-card bg-light p-3 rounded mb-3">
+            <p class="card-text mb-0">{{ comment.content }}
+                <small></i></small>
+            </p>
+            <p class="card-text mb-0 text-muted"><small>Posted by <a href="/{{ comment.owner.username }}">
+                        {{ comment.owner.username }}</a>
+                    {% if comment.owner.id == user.id %}
+                    <i hx-get="/webutils/comment/{{ comment.id }}/edit" hx-trigger="click"
+                        hx-target="#comment-div-{{ comment.id }}-edit" hx-swap="outerHTML"
+                        class="far fa-edit edit-icon"></i>
+                    {% endif %}
+                </small></p>
+        </div>
+    </div>
+</div>

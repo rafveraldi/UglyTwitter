@@ -1,0 +1,24 @@
+<div id="comment-div-{{ comment.id }}-edit" class="col-12 col-md-10">
+    <div class="comment-card bg-light p-3 rounded mb-3">
+        <form>
+            <div class="d-flex align-items-start justify-content-end">
+                <textarea id="content" name="content" class="form-control mr-2"
+                    rows="3">{{ comment.content }}</textarea>
+                <div class="d-flex flex-column">
+                    <button hx-put="/webutils/comment/{{ comment.id }}/edit" hx-target="#comment-div-{{ comment.id }}"
+                        hx-swap="outerHTML" class="btn btn-success btn-sm mb-1" type="button"><i
+                            class="far fa-check-circle"></i></button>
+                    <button hx-get="/webutils/comment/{{ comment.id }}" hx-target="#comment-div-{{ comment.id }}"
+                        hx-swap="outerHTML" class="btn btn-secondary btn-sm mb-1" type="button"><i
+                            class="far fa-times-circle"></i></button>
+                    <button hx-delete="webutils/comment/{{ comment.id }}" hx-target="#comment-div-{{ comment.id }}"
+                        hx-swap="outerHTML" class="btn btn-danger btn-sm" type="button"><i
+                            class="far fa-trash-alt"></i></button>
+                </div>
+            </div>
+            <p class="card-text mb-0 text-muted"><small>Posted by <a href="/{{ comment.owner.username }}">
+                        {{ comment.owner.username }}</a>
+                </small></p>
+        </form>
+    </div>
+</div>
