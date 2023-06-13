@@ -4,41 +4,6 @@ from typing import Optional
 from pydantic import BaseModel, EmailStr
 
 
-class Like(BaseModel):
-    id: int
-    user_id: int
-    tweet_id: int
-    created_at: datetime.datetime
-
-    class Config:
-        orm_mode = True
-
-
-class Follow(BaseModel):
-    id: int
-    follower_id: int
-    followee_id: int
-    created_at: datetime.datetime
-
-    class Config:
-        orm_mode = True
-
-
-class CommentBase(BaseModel):
-    content: str
-
-    class Config:
-        orm_mode = True
-
-
-class Comment(CommentBase):
-    id: int
-    tweet_id: int
-    user_id: int
-    created_at: datetime.datetime
-    updated_at: Optional[datetime.datetime] = None
-
-
 class UserBase(BaseModel):
     username: str
 
@@ -57,11 +22,48 @@ class UserBasic(UserBase):
     name: Optional[str] = None
 
 
+class Follow(BaseModel):
+    id: int
+    follower_id: int
+    followee_id: int
+    created_at: datetime.datetime
+    user_follower: UserBasic
+    user_followee: UserBasic
+
+    class Config:
+        orm_mode = True
+
+
 class User(UserBasic):
-    likes: list[Like] = []
-    comments: list[CommentBase] = []
     following: list[Follow] = []
     followers: list[Follow] = []
+
+
+class Like(BaseModel):
+    id: int
+    user_id: int
+    tweet_id: int
+    created_at: datetime.datetime
+    owner: User
+
+    class Config:
+        orm_mode = True
+
+
+class CommentBase(BaseModel):
+    content: str
+
+    class Config:
+        orm_mode = True
+
+
+class Comment(CommentBase):
+    id: int
+    tweet_id: int
+    user_id: int
+    created_at: datetime.datetime
+    updated_at: Optional[datetime.datetime] = None
+    owner: User
 
 
 class TweetBase(BaseModel):
