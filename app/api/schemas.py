@@ -27,6 +27,9 @@ class Follow(BaseModel):
 class CommentBase(BaseModel):
     content: str
 
+    class Config:
+        orm_mode = True
+
 
 class Comment(CommentBase):
     id: int
@@ -35,12 +38,12 @@ class Comment(CommentBase):
     created_at: datetime.datetime
     updated_at: Optional[datetime.datetime] = None
 
-    class Config:
-        orm_mode = True
-
 
 class UserBase(BaseModel):
     username: str
+
+    class Config:
+        orm_mode = True
 
 
 class UserCreate(UserBase):
@@ -53,9 +56,6 @@ class UserBasic(UserBase):
     bio: Optional[str] = None
     name: Optional[str] = None
 
-    class Config:
-        orm_mode = True
-
 
 class User(UserBasic):
     likes: list[Like] = []
@@ -63,12 +63,12 @@ class User(UserBasic):
     following: list[Follow] = []
     followers: list[Follow] = []
 
-    class Config:
-        orm_mode = True
-
 
 class TweetBase(BaseModel):
     content: str
+
+    class Config:
+        orm_mode = True
 
 
 class TweetBasic(TweetBase):
@@ -82,6 +82,3 @@ class Tweet(TweetBasic):
     owner: User
     comments: list[Comment] = []
     likes: list[Like] = []
-
-    class Config:
-        orm_mode = True
