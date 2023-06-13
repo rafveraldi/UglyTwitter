@@ -39,25 +39,6 @@ class Comment(CommentBase):
         orm_mode = True
 
 
-class TweetBase(BaseModel):
-    content: str
-
-
-class TweetBasic(TweetBase):
-    id: int
-    user_id: int
-    created_at: datetime.datetime
-    updated_at: Optional[datetime.datetime] = None
-
-
-class Tweet(TweetBasic):
-    comments: list[Comment] = []
-    likes: list[Like] = []
-
-    class Config:
-        orm_mode = True
-
-
 class UserBase(BaseModel):
     username: str
 
@@ -78,10 +59,29 @@ class UserBasic(UserBase):
 
 class User(UserBasic):
     likes: list[Like] = []
-    tweets: list[Tweet] = []
     comments: list[CommentBase] = []
     following: list[Follow] = []
     followers: list[Follow] = []
+
+    class Config:
+        orm_mode = True
+
+
+class TweetBase(BaseModel):
+    content: str
+
+
+class TweetBasic(TweetBase):
+    id: int
+    user_id: int
+    created_at: datetime.datetime
+    updated_at: Optional[datetime.datetime] = None
+
+
+class Tweet(TweetBasic):
+    owner: User
+    comments: list[Comment] = []
+    likes: list[Like] = []
 
     class Config:
         orm_mode = True

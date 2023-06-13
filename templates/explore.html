@@ -36,11 +36,16 @@
             </div>
         </div>
     </div>
-    {% else %}
-    {% for tweet in tweets %}
-    {% include "partials/tweet.html" %}
-    {% endfor %}
-    {% endif %}
+    <div class="container">
+        {% if tweets|count == 0 %}
+        <div class="alert alert-info" role="alert">
+            Nobody has tweeted anything yet. Give it some time and explore again.
+        </div>
+        {% else %}
+        {% for tweet in tweets %}
+        {% include "partials/tweet.html" %}
+        {% endfor %}
+        {% endif %}
     </div>
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>

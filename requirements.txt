@@ -2,7 +2,7 @@ uvicorn
 fastapi==0.95.2
 passlib==1.7.4
 pydantic==1.10.7
-python_bcrypt==0.3.2
+bcrypt
 python_jose==3.3.0
 SQLAlchemy==2.0.12
 Jinja2

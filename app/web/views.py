@@ -59,7 +59,7 @@ async def read_explore(
             "user": user,
             "tweets": tweets,
         }
-        return templates.TemplateResponse("/home.html", context)
+        return templates.TemplateResponse("/explore.html", context)
     else:
         return RedirectResponse("/login?unauthorized=True", status_code=302)
 

@@ -11,6 +11,8 @@ It doesn't look as pretty as the original, but you can still do CRUD operations 
 - Comment
 - Like
 
+[Click here](http://ugly.veraldi.ca/) to access it online!
+
 It started as a backend API that can be used by any frontend developer for educational purposes and became a full web application as I took advantage of AI's help on generating HTML page templates.
 
 The API can still be used by another frontend application separately as all endpoints are available.
